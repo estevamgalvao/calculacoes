@@ -1,20 +1,25 @@
-package com.estevam.calculacoes.operations;
+package com.estevam.calculacoes.operation;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import lombok.Data;
+
+@Data
 public class Operation {
     
     private LocalDate date;
     private String assetCode;
-    private String type;
+    private OperationType type;
+    private String marketType; // "à vista" or "opções"; fazer classe enum?
     private int quantity;
     private BigDecimal price;
 
-    public Operation(LocalDate date, String assetCode, String type, int quantity, BigDecimal price) {
+    public Operation(LocalDate date, String assetCode, OperationType type, String marketType, int quantity, BigDecimal price) {
         this.date = date;
         this.assetCode = assetCode.toUpperCase();
         this.type = type;
+        this.marketType = marketType;
         this.quantity = quantity;
         this.price = price;
     }
