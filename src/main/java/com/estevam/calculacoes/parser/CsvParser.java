@@ -22,6 +22,49 @@ public class CsvParser {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+private static final String[] EXPECTED_HEADERS = {
+        "Data do Negócio",
+        "Tipo de Movimentação",
+        "Mercado",
+        "Prazo/Vencimento",
+        "Instituição",
+        "Código de Negociação",
+        "Quantidade",
+        "Preço",
+        "Valor"
+    };
+
+    /**
+     * Validates that the CSV header matches the expected column order.
+     * 
+     * @param headerLine the first line of the CSV file
+     * @throws CsvParseException if the header doesn't match the expected format
+     */
+    public static void validateHeader(String headerLine) throws CsvParseException {
+        String[] actualHeaders = parseCsvLine(headerLine);
+        
+        if (actualHeaders.length != EXPECTED_HEADERS.length) {
+            throw new CsvParseException(
+                String.format("Invalid header: expected %d columns, but found %d", 
+                    EXPECTED_HEADERS.length, actualHeaders.length), 
+                null
+            );
+        }
+        
+        for (int i = 0; i < EXPECTED_HEADERS.length; i++) {
+            String expected = EXPECTED_HEADERS[i].trim();
+            String actual = actualHeaders[i].trim().replace("\"", "");
+            
+            if (!expected.equals(actual)) {
+                throw new CsvParseException(
+                    String.format("Invalid header at column %d: expected '%s', but found '%s'", 
+                        i + 1, expected, actual), 
+                    null
+                );
+            }
+        }
+    }
+
     /**
      * Reads a CSV file and returns a map of assets indexed by trading code.
      */
@@ -34,7 +77,8 @@ public class CsvParser {
 
             while ((line = br.readLine()) != null) {
                 if (isFirstLine) {
-                    isFirstLine = false; // Skip header
+                    validateHeader(line); // Validate header before processing
+                    isFirstLine = false;
                     continue;
                 }
 
@@ -64,6 +108,8 @@ public class CsvParser {
 
         } catch (IOException e) {
             throw new CsvParseException("Error reading CSV file: " + csvFilePath, e);
+        } catch (CsvParseException e) {
+            throw e; // Re-throw CSV parse exceptions
         } catch (Exception e) {
             throw new CsvParseException("Error parsing CSV content", e);
         }
