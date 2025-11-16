@@ -24,4 +24,15 @@ public class Operation {
         this.price = price;
     }
 
+    @Override
+    public String toString() {
+        return "Operation{" +
+                "date=" + date +
+                ", assetCode='" + assetCode + '\'' +
+                ", type=" + type +
+                ", quantity=" + quantity +
+                ", price=" + price +
+                '}';
+    }
+
 }

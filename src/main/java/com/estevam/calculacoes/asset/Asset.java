@@ -91,5 +91,18 @@ public class Asset {
         this.realizedProfitLoss = profitLoss;
     }
 
+    @Override
+    public String toString() {
+        return "Asset{" +
+                "name='" + name + '\'' +
+                ", tradingCode='" + tradingCode + '\'' +
+                ", institution='" + institution + '\'' +
+                ", averagePrice=" + averagePrice +
+                ", quantity=" + quantity +
+                ", totalValue=" + totalValue +
+                ", realizedProfitLoss=" + realizedProfitLoss +
+                '}';
+    }
+
     
 }
