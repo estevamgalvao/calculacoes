@@ -61,7 +61,7 @@ public class Asset {
                 BigDecimal totalInvested = avgPrice.multiply(BigDecimal.valueOf(qty));
                 totalInvested = totalInvested.add(op.getPrice().multiply(BigDecimal.valueOf(op.getQuantity())));
                 qty += op.getQuantity();
-                avgPrice = qty > 0 ? totalInvested.divide(BigDecimal.valueOf(qty), 2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+                avgPrice = qty > 0 ? totalInvested.divide(BigDecimal.valueOf(qty), 10, RoundingMode.HALF_UP) : BigDecimal.ZERO;
 
             } else if (op.getType() == OperationType.SELL) {
                 // Calculate profit based on average price BEFORE the sale
@@ -97,10 +97,10 @@ public class Asset {
                 "name='" + name + '\'' +
                 ", tradingCode='" + tradingCode + '\'' +
                 ", institution='" + institution + '\'' +
-                ", averagePrice=" + averagePrice +
+                ", averagePrice=" + averagePrice.setScale(2, RoundingMode.HALF_UP) +
                 ", quantity=" + quantity +
-                ", totalValue=" + totalValue +
-                ", realizedProfitLoss=" + realizedProfitLoss +
+                ", totalValue=" + totalValue.setScale(2, RoundingMode.HALF_UP) +
+                ", realizedProfitLoss=" + realizedProfitLoss.setScale(2, RoundingMode.HALF_UP) +
                 '}';
     }
 
