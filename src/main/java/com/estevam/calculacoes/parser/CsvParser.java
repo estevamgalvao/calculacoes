@@ -95,7 +95,9 @@ private static final String[] EXPECTED_HEADERS = {
                 String originalTicker = fields[5].trim();
                 String ticker = TickerUtils.cleanTicker(originalTicker);
                 int quantity = Integer.parseInt(fields[6].trim());
-                String priceStr = fields[7].trim().replace("R$", "").replace(".", "").replace(",", ".").trim();
+                String priceStr = fields[7];
+                priceStr = priceStr.replace("\"", "").replace(" ", ""); // Remove quotes and spaces
+                priceStr = priceStr.replace("R$", "").replace(".", "").replace(",", "."); // Normalize currency format
                 BigDecimal price = new BigDecimal(priceStr);
 
                 OperationType operationType = OperationType.fromPortuguese(typeLabel);
