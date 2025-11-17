@@ -1,4 +1,4 @@
-package com.estevam.calculacoes.parser;
+package com.estevam.calculacoes.parser.exception;
 
 /**
  * Exception thrown when CSV parsing fails.

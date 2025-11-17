@@ -3,8 +3,8 @@ package com.estevam.calculacoes.parser;
 import com.estevam.calculacoes.asset.Asset;
 import com.estevam.calculacoes.operation.Operation;
 import com.estevam.calculacoes.operation.OperationType;
+import com.estevam.calculacoes.parser.exception.CsvParseException;
 import com.estevam.calculacoes.core.util.TickerUtils;
-//import com.estevam.calculacoes.parser.exception.CsvParseException;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
