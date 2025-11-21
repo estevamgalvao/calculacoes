@@ -27,8 +27,7 @@ public class PortfolioService {
      * Processes uploaded CSV content (for REST API).
      */
     public Map<String, Asset> processPortfolioFromCsvContent(byte[] csvContent) throws CsvParseException {
-        // TODO: Implement in-memory CSV parsing
-        throw new UnsupportedOperationException("Not implemented yet");
+        return CsvParser.parseTradesFromCsvContent(csvContent);
     }
 
     /**

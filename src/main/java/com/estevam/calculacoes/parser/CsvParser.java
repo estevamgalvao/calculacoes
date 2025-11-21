@@ -7,9 +7,12 @@ import com.estevam.calculacoes.parser.exception.CsvParseException;
 import com.estevam.calculacoes.core.util.TickerUtils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -65,16 +68,13 @@ public class CsvParser {
         }
     }
 
-    /**
-     * Reads a CSV file and returns a map of assets indexed by trading code.
-     */
-    public static Map<String, Asset> parseTradesFromCsv(String csvFilePath) throws CsvParseException {
+
+    public static Map<String, Asset> parseTrades(BufferedReader br) throws CsvParseException {
         Map<String, Asset> assets = new HashMap<>();
+        String line;
+        boolean isFirstLine = true;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
-            String line;
-            boolean isFirstLine = true;
-
+        try {
             while ((line = br.readLine()) != null) {
                 if (isFirstLine) {
                     validateHeader(line); // Validate header before processing
@@ -107,6 +107,54 @@ public class CsvParser {
                 Asset asset = assets.computeIfAbsent(ticker, k -> new Asset(ticker, ticker, institution));
                 asset.addOperation(operation);
             }
+        } catch (IOException e) {
+            throw new CsvParseException("Error reading CSV content", e);
+        } catch (CsvParseException e) {
+            throw e; // Re-throw CSV parse exceptions
+        } catch (Exception e) {
+            throw new CsvParseException("Error parsing CSV content", e);
+        }
+
+        return assets;
+    }
+
+
+    /**
+     * Parses CSV content from byte array (for REST API uploads).
+     * 
+     * @param csvContent the CSV file content as byte array
+     * @return a map of assets indexed by trading code
+     * @throws CsvParseException if parsing fails
+     */
+    public static Map<String, Asset> parseTradesFromCsvContent(byte[] csvContent) throws CsvParseException {
+        Map<String, Asset> assets = new HashMap<>();
+
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new ByteArrayInputStream(csvContent), StandardCharsets.UTF_8))) {
+            
+            assets = parseTrades(br);
+        
+        } catch (IOException e) {
+            throw new CsvParseException("Error reading CSV content from byte array", e);
+        } catch (CsvParseException e) {
+            throw e; // Re-throw CSV parse exceptions
+        } catch (Exception e) {
+            throw new CsvParseException("Error parsing CSV content", e);
+        }
+
+        return assets;
+    }
+
+
+    /**
+     * Reads a CSV file and returns a map of assets indexed by trading code.
+     */
+    public static Map<String, Asset> parseTradesFromCsv(String csvFilePath) throws CsvParseException {
+        Map<String, Asset> assets = new HashMap<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
+            
+            assets = parseTrades(br);
 
         } catch (IOException e) {
             throw new CsvParseException("Error reading CSV file: " + csvFilePath, e);
