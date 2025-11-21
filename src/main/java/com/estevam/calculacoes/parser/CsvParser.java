@@ -22,17 +22,17 @@ public class CsvParser {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-private static final String[] EXPECTED_HEADERS = {
-        "Data do Negócio",
-        "Tipo de Movimentação",
-        "Mercado",
-        "Prazo/Vencimento",
-        "Instituição",
-        "Código de Negociação",
-        "Quantidade",
-        "Preço",
-        "Valor"
-    };
+    private static final String[] EXPECTED_HEADERS = {
+            "Data do Negócio",
+            "Tipo de Movimentação",
+            "Mercado",
+            "Prazo/Vencimento",
+            "Instituição",
+            "Código de Negociação",
+            "Quantidade",
+            "Preço",
+            "Valor"
+        };
 
     /**
      * Validates that the CSV header matches the expected column order.
