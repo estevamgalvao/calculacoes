@@ -14,7 +14,11 @@ public final class TickerUtils {
      * Example: "PETR4F" -> "PETR4"
      */
     public static String cleanTicker(String ticker) {
-        if (ticker != null && ticker.endsWith("F")) {
+        if (ticker == null) {
+            return null;
+        }
+        ticker = ticker.replace(" ", ""); // Remove all whitespace
+        if (ticker.endsWith("F")) {
             return ticker.substring(0, ticker.length() - 1);
         }
         return ticker;
