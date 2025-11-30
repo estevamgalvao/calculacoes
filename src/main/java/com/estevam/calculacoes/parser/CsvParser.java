@@ -85,7 +85,11 @@ public class CsvParser {
                 String[] fields = parseCsvLine(line);
 
                 if (fields.length < 9) {
-                    continue; // Skip malformed lines
+                    throw new CsvParseException(
+                        "Malformed CSV line: expected at least 9 fields but found " + fields.length + ". Line content: " + line, 
+                        null
+                    );
+                    //continue; // Skip malformed lines
                 }
 
                 LocalDate date = LocalDate.parse(fields[0].trim(), DATE_FORMATTER);
@@ -96,6 +100,7 @@ public class CsvParser {
                 String ticker = TickerUtils.cleanTicker(originalTicker);
                 int quantity = Integer.parseInt(fields[6].trim());
                 String priceStr = fields[7];
+                validateQuotedBrazilianDecimalFormat(priceStr); // Validate price format "10.02" -> not valid, should be "10,02"
                 priceStr = priceStr.replace("\"", "").replace(" ", ""); // Remove quotes and spaces
                 priceStr = priceStr.replace("R$", "").replace(".", "").replace(",", "."); // Normalize currency format
                 BigDecimal price = new BigDecimal(priceStr);
@@ -173,4 +178,38 @@ public class CsvParser {
     private static String[] parseCsvLine(String line) {
         return line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
     }
+
+
+    private static void validateQuotedBrazilianDecimalFormat(String rawPrice) throws CsvParseException {
+        rawPrice = rawPrice.trim();
+        if (!(rawPrice.startsWith("\"") && rawPrice.endsWith("\""))) {
+            throw new CsvParseException(
+                "Invalid price: expected to be enclosed in quotes (e.g., \"10,03\"). Amount received: \"" 
+                + rawPrice + "\"",
+            null);
+        }
+
+        String s = rawPrice.replace("\"", "");
+        
+        s = s.replace("R$", "").trim();
+
+        int commaIndex = s.lastIndexOf(',');
+        if (commaIndex < 0) {
+            throw new CsvParseException(
+                "Invalid price: expected decimal separator with comma (e.g., 10,03). Amount received: \"" 
+                + rawPrice + "\"",
+            null);
+        }
+
+        String decimalPart = s.substring(commaIndex + 1);
+
+        if (decimalPart.length() != 2 || !decimalPart.chars().allMatch(Character::isDigit)) {
+            throw new CsvParseException(
+                "Invalid price: expected to have exactly 2 decimal places (e.g., 10,03). Amount received: \"" 
+                + rawPrice + "\"",
+                null
+            );
+        }
+}
+
 }
