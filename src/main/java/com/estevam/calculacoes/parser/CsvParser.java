@@ -182,6 +182,14 @@ public class CsvParser {
 
     private static void validateQuotedBrazilianDecimalFormat(String rawPrice) throws CsvParseException {
         rawPrice = rawPrice.trim();
+
+        if (rawPrice.matches(".*[a-zA-Z].*")) {
+            throw new CsvParseException(
+                "Invalid price: should not contain letters. Amount received: \"" 
+                + rawPrice + "\"",
+            null);
+        }
+
         if (!(rawPrice.startsWith("\"") && rawPrice.endsWith("\""))) {
             throw new CsvParseException(
                 "Invalid price: expected to be enclosed in quotes (e.g., \"10,03\"). Amount received: \"" 

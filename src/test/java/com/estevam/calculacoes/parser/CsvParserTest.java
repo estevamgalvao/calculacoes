@@ -465,10 +465,10 @@ class CsvParserTest {
     // ========================================
 
     /**
-     * TEST 15: Should skip malformed lines (less than 9 fields)
+     * TEST 15: Should throws an CsvParseException malformed lines (less than 9 fields)
      * 
      * Scenario: CSV contains a line with only 5 fields
-     * Expected: Line is skipped, other valid lines are parsed
+     * Expected: Line throws an CsvParseException
      */
     @Test
     @DisplayName("Should skip malformed lines with insufficient fields")
@@ -482,17 +482,12 @@ class CsvParserTest {
         
         Path csvFile = createTempCsvFile("malformed_lines.csv", csvContent);
         
-        // ACT
-        Map<String, Asset> assets = CsvParser.parseTradesFromCsv(csvFile.toString());
-        
-        // ASSERT
-        assertThat(assets)
-            .as("Should parse 2 valid lines, skip 1 malformed line")
-            .hasSize(2)
-            .containsKeys("PETR4", "VALE3");
-        
-        assertThat(assets.get("PETR4").getOperations()).hasSize(1);
-        assertThat(assets.get("VALE3").getOperations()).hasSize(1);
+        // ACT & ASSERT
+        assertThatThrownBy(() -> CsvParser.parseTradesFromCsv(csvFile.toString()))
+            .as("Should throw CsvParseException for malformed lines")
+            .isInstanceOf(CsvParseException.class)
+            .hasMessageContaining("Malformed CSV line");
+
     }
 
     /**
@@ -603,7 +598,7 @@ class CsvParserTest {
         assertThatThrownBy(() -> CsvParser.parseTradesFromCsv(csvFile.toString()))
             .as("Should throw CsvParseException for invalid price")
             .isInstanceOf(CsvParseException.class)
-            .hasMessageContaining("Error parsing CSV content");
+            .hasMessageContaining("Invalid price: should not contain letters");
     }
 
     /**
