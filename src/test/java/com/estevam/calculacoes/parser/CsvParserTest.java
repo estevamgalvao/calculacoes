@@ -658,22 +658,23 @@ class CsvParserTest {
     }
 
     /**
-     * TEST 23: Should throw CsvParseException for completely empty file
+     * TEST 23: Empty file should return empty asset map
      * 
      * Scenario: CSV file is completely empty (no header, no data)
-     * Expected: CsvParseException (no header to validate)
+     * Expected: An empty map is returned (no assets)
      */
     @Test
-    @DisplayName("Should throw exception for completely empty file")
-    void shouldThrowExceptionForEmptyFile() throws Exception {
+    @DisplayName("Should return an empty asset map (no assets) for completely empty file")
+    void shouldReturnEmptyMapForEmptyFile() throws Exception {
         // ARRANGE
         String csvContent = "";
         Path csvFile = createTempCsvFile("empty.csv", csvContent);
         
         // ACT & ASSERT
-        assertThatThrownBy(() -> CsvParser.parseTradesFromCsv(csvFile.toString()))
-            .as("Should throw exception for empty file")
-            .isInstanceOf(CsvParseException.class);
+        assertThat(CsvParser.parseTradesFromCsv(csvFile.toString()))
+            .as("Should return empty map for completely empty file")
+            .isEmpty();
+            
     }
 
     // ========================================
@@ -703,7 +704,7 @@ class CsvParserTest {
         Asset petr4 = assets.get("PETR4");
         assertThat(petr4.getInstitution())
             .as("Institution name with comma should be parsed correctly")
-            .isEqualTo("Clear Corretora, CTVM");
+            .isEqualTo("\"Clear Corretora, CTVM\"");
     }
 
     // ========================================

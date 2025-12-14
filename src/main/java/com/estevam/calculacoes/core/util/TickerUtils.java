@@ -10,7 +10,7 @@ public final class TickerUtils {
     }
 
     /**
-     * Removes the 'F' suffix from fractional market codes to unify with spot market.
+     * Removes the 'F' suffix from fractional market codes to unify with spot market. Returns cleaned Uppercase ticker.
      * Example: "PETR4F" -> "PETR4"
      */
     public static String cleanTicker(String ticker) {
@@ -21,6 +21,6 @@ public final class TickerUtils {
         if (ticker.endsWith("F")) {
             return ticker.substring(0, ticker.length() - 1);
         }
-        return ticker;
+        return ticker.toUpperCase();
     }
 }
