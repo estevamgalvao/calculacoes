@@ -590,7 +590,7 @@ class CsvParserTest {
         // ARRANGE
         String csvContent = 
             "Data do Negócio,Tipo de Movimentação,Mercado,Prazo/Vencimento,Instituição,Código de Negociação,Quantidade,Preço,Valor\n" +
-            "15/01/2024,compra,à vista,D+2,Clear Corretora,PETR4,100,INVALID,\"R$ 1.000,00\"";  // "INVALID" instead of number
+            "15/01/2024,compra,à vista,D+2,Clear Corretora,PETR4,100,\"INVALID\",\"R$ 1.000,00\"";  // "INVALID" instead of number
         
         Path csvFile = createTempCsvFile("invalid_price.csv", csvContent);
         
@@ -826,6 +826,44 @@ class CsvParserTest {
         assertThat(vale3.getQuantity()).isEqualTo(15);
         assertThat(vale3.getAveragePrice()).isEqualByComparingTo(new BigDecimal("72.89"));
     }
+
+    // ========================================
+    // EXTRAS
+    // ========================================
+
+
+    /**
+     * TEST 28: Should skip empty lines
+     * 
+     * Scenario: CSV contains empty lines between data rows
+     * Expected: Parses successfully ignoring empty lines
+     * 
+     * Note: CsvParser.parseTradesFromCsv should skip empty lines
+     */
+    @Test
+    @DisplayName("Should skip empty lines in CSV")
+    void shouldSkipEmptyLinesInCsv() throws Exception {
+        // ARRANGE
+        String csvContent = 
+            "Data do Negócio,Tipo de Movimentação,Mercado,Prazo/Vencimento,Instituição,Código de Negociação,Quantidade,Preço,Valor\n" + 
+            "15/01/2024,compra,à vista,D+2,Clear Corretora,PETR4,100,\"R$ 10,00\",\"R$ 1.000,00\"\n" +
+            "\n" +  // Empty line
+            "20/02/2024,compra,à vista,D+2,Clear Corretora,VALE3F,50,\"R$ 15,00\",\"R$ 750,00\"\n" +
+            "\n";  // Another empty line
+        
+        Path csvFile = createTempCsvFile("empty_lines.csv", csvContent);
+
+        // ACT
+        Map<String, Asset> assets = CsvParser.parseTradesFromCsv(csvFile.toString());
+        
+        // ASSERT
+        assertThat(assets)
+            .as("Should parse CSV ignoring empty lines")
+            .hasSize(2)
+            .containsKey("PETR4")
+            .containsKey("VALE3");
+    }
+
 
     // ========================================
     // HELPER METHODS

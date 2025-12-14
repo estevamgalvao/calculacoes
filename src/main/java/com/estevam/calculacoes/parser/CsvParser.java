@@ -81,6 +81,9 @@ public class CsvParser {
                     isFirstLine = false;
                     continue;
                 }
+                if (line.trim().isEmpty()) {
+                    continue; // Skip empty lines
+                }
 
                 String[] fields = parseCsvLine(line);
 
@@ -183,12 +186,6 @@ public class CsvParser {
     private static void validateQuotedBrazilianDecimalFormat(String rawPrice) throws CsvParseException {
         rawPrice = rawPrice.trim();
 
-        if (rawPrice.matches(".*[a-zA-Z].*")) {
-            throw new CsvParseException(
-                "Invalid price: should not contain letters. Amount received: \"" 
-                + rawPrice + "\"",
-            null);
-        }
 
         if (!(rawPrice.startsWith("\"") && rawPrice.endsWith("\""))) {
             throw new CsvParseException(
@@ -200,6 +197,14 @@ public class CsvParser {
         String s = rawPrice.replace("\"", "");
         
         s = s.replace("R$", "").trim();
+
+        
+        if (s.matches(".*[a-zA-Z].*")) {
+            throw new CsvParseException(
+                "Invalid price: should not contain letters after R$ removal. Amount received: \"" 
+                + s + "\"",
+            null);
+        }
 
         int commaIndex = s.lastIndexOf(',');
         if (commaIndex < 0) {
