@@ -28,6 +28,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/portfolio")
+@CrossOrigin(origins = "http://localhost:4200")
 @Tag(name = "Portfolio", description = "Endpoints for managing stock portfolio positions")
 public class PortfolioController {
 
