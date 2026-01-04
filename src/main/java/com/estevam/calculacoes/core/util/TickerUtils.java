@@ -19,7 +19,7 @@ public final class TickerUtils {
         }
         ticker = ticker.replace(" ", ""); // Remove all whitespace
         if (ticker.endsWith("F")) {
-            return ticker.substring(0, ticker.length() - 1);
+            return ticker.substring(0, ticker.length() - 1).toUpperCase();
         }
         return ticker.toUpperCase();
     }

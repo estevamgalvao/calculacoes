@@ -257,7 +257,7 @@ class TickerUtilsTest {
         // ASSERT
         assertThat(result)
             .as("Lowercase 'f' should NOT be removed (case-sensitive)")
-            .isEqualTo("PETR4f");
+            .isEqualTo("PETR4F");
     }
 
     /**
@@ -268,10 +268,10 @@ class TickerUtilsTest {
      */
     @ParameterizedTest(name = "[{index}] cleanTicker(''{0}'') should return ''{1}''")
     @CsvSource({
-        "Petr4F, Petr4",      // Mixed case with uppercase F
+        "Petr4F, PETR4",      // Mixed case with uppercase F
         "PETR4F, PETR4",      // All uppercase
-        "petr4F, petr4",      // Lowercase with uppercase F
-        "petr4f, petr4f"      // All lowercase (f not removed)
+        "petr4F, PETR4",      // Lowercase with uppercase F
+        "petr4f, PETR4F"      // All lowercase (f not removed)
     })
     @DisplayName("Should handle mixed case tickers correctly")
     void shouldHandleMixedCaseTickers(String input, String expected) {
