@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +21,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 
+import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * REST controller for portfolio operations.
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/portfolio")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -72,8 +75,18 @@ public class PortfolioController {
     })
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Response<PortfolioSummary>> uploadCsv(@RequestParam("file") MultipartFile file) throws CsvParseException, Exception {
-        Map<String, Asset> assets = portfolioService.processPortfolioFromCsvContent(file.getBytes());
+        String requestId = UUID.randomUUID().toString();
+        Instant start = Instant.now();
+        
+        log.info("[requestId={}] Starting CSV upload processing. filename={}, size={}",
+                requestId, file.getOriginalFilename(), file.getSize());
+        
+                Map<String, Asset> assets = portfolioService.processPortfolioFromCsvContent(file.getBytes(), requestId);
         PortfolioSummary summary = portfolioService.generateSummary(assets);
+        
+        Instant end = Instant.now();
+        log.info("[requestId={}] CSV processing completed. durationMs={}",
+                requestId, end.toEpochMilli() - start.toEpochMilli());
         return ResponseEntity.ok(new Response<>(true, 200, "HTTP_STATUS_OK", "Sucesso.", summary));
     }
 

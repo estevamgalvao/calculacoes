@@ -26,8 +26,8 @@ public class PortfolioService {
     /**
      * Processes uploaded CSV content (for REST API).
      */
-    public Map<String, Asset> processPortfolioFromCsvContent(byte[] csvContent) throws CsvParseException {
-        return CsvParser.parseTradesFromCsvContent(csvContent);
+    public Map<String, Asset> processPortfolioFromCsvContent(byte[] csvContent, String requestId) throws CsvParseException {
+        return CsvParser.parseTradesFromCsvContent(csvContent, requestId);
     }
 
     /**

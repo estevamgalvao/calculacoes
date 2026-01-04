@@ -4,6 +4,9 @@ import com.estevam.calculacoes.asset.Asset;
 import com.estevam.calculacoes.operation.Operation;
 import com.estevam.calculacoes.operation.OperationType;
 import com.estevam.calculacoes.parser.exception.CsvParseException;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.estevam.calculacoes.core.util.TickerUtils;
 
 import java.io.BufferedReader;
@@ -21,6 +24,7 @@ import java.util.Map;
 /**
  * Parses CSV files containing stock trading history.
  */
+@Slf4j
 public class CsvParser {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -134,19 +138,24 @@ public class CsvParser {
      * @return a map of assets indexed by trading code
      * @throws CsvParseException if parsing fails
      */
-    public static Map<String, Asset> parseTradesFromCsvContent(byte[] csvContent) throws CsvParseException {
+    public static Map<String, Asset> parseTradesFromCsvContent(byte[] csvContent, String requestId) throws CsvParseException {
+        log.info("[requestId={}] Starting CSV parsing.", requestId);
         Map<String, Asset> assets = new HashMap<>();
 
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(new ByteArrayInputStream(csvContent), StandardCharsets.UTF_8))) {
             
             assets = parseTrades(br);
-        
+            log.info("[requestId={}] Completed CSV parsing. Parsed {} assets.", requestId, assets.size());
+
         } catch (IOException e) {
+            log.error("[requestId={}] Error processing CSV {}", requestId, e.getMessage(), e);
             throw new CsvParseException("Error reading CSV content from byte array", e);
         } catch (CsvParseException e) {
+            log.error("[requestId={}] Error processing CSV {}", requestId, e.getMessage(), e);
             throw e; // Re-throw CSV parse exceptions
         } catch (Exception e) {
+            log.error("[requestId={}] Error processing CSV {}", requestId, e.getMessage(), e);
             throw new CsvParseException("Error parsing CSV content", e);
         }
 
