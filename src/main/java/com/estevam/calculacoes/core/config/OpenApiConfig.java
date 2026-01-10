@@ -26,7 +26,7 @@ public class OpenApiConfig {
                         .contact(new Contact()
                                 .name("Estevam Galvão Albuquerque")
                                 .email("contatoestevamalbuquerque@gmail.com")
-                                .url("https://github.com/estevamgalvao/calculacoes"))
+                                .url("https://github.com/estevamgalvao"))
                         .license(new License()
                                 .name("MIT License")
                                 .url("https://opensource.org/licenses/MIT")))
