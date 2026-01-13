@@ -96,7 +96,6 @@ public class CsvParser {
                         "Malformed CSV line: expected at least 9 fields but found " + fields.length + ". Line content: " + line, 
                         null
                     );
-                    //continue; // Skip malformed lines
                 }
 
                 LocalDate date = LocalDate.parse(fields[0].trim(), DATE_FORMATTER);

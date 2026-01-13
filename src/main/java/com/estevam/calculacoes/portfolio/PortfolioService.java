@@ -34,7 +34,6 @@ public class PortfolioService {
      * Generates a summary report from assets.
      */
     public PortfolioSummary generateSummary(Map<String, Asset> assets) {
-        // TODO: Aggregate totals, calculate portfolio metrics
         return new PortfolioSummary(assets);
     }
 }

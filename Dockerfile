@@ -1,27 +1,33 @@
-# Estágio 1: Build com imagem do maven e JDK 21
+# Stage 1: Build with Maven and JDK 21 image
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 
 COPY pom.xml .
-# Se mudar código Java mas n mudar o pom.xml, o Docker reutiliza essa camada e n baixa tudo de novo
+
+# if you change Java code but not pom.xml, Docker reuses this layer and doesn't download everything again
 RUN mvn dependency:go-offline
 
-# Copia o código e gera o JAR
+
+# Copy the code and build the JAR
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Estágio 2: Runtime
-# Utiliza uma imagem mais leve apenas com JRE
+
+# Stage 2: Runtime
+# Uses a lighter image with only JRE
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-# Copia apenas o JAR gerado no estágio anterior
+
+# Copy only the JAR generated in the previous stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Expõe a porta padrão do Spring Boot
+
+# Expose the default Spring Boot port
 EXPOSE 8080
 
-# Configurações de memória otimizadas para containers pequenos
-# -XX:+UseContainerSupport: JVM respeita limites do container
-# -XX:MaxRAMPercentage=75.0: evita a JVM pegar memória demais - caso eu use clouds com pouca RAM
-# -jar app.jar: executa a app
+
+# Memory settings optimized for small containers
+# -XX:+UseContainerSupport: JVM respects container limits
+# -XX:MaxRAMPercentage=75.0: prevents JVM from using too much memory - useful for clouds with low RAM
+# -jar app.jar: runs the app
 ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

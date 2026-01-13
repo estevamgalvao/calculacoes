@@ -11,7 +11,7 @@ public class Operation {
     private LocalDate date;
     private String assetCode;
     private OperationType type;
-    private String marketType; // "à vista" or "opções"; fazer classe enum?
+    private String marketType;
     private int quantity;
     private BigDecimal price;
 
