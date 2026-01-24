@@ -9,6 +9,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +29,7 @@ public class CorsConfig {
     private String allowedOrigins;
 
     @Bean
+    @NonNull
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
@@ -63,11 +65,7 @@ public class CorsConfig {
 
     @Bean
     public CorsFilter corsFilter() {
-        if(corsConfigurationSource() == null) {
-            log.warn("CORS configuration source is null!");
-        } else {
-            log.info("CORS configuration source initialized successfully.");
-        }
+        log.info("CORS configuration source initialized successfully.");
         return new CorsFilter(corsConfigurationSource());
 
     }
