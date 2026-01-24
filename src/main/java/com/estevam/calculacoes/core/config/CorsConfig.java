@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.List;
  * Default value: http://localhost:4200
  */
 @Configuration
+@Slf4j
 public class CorsConfig {
 
     @Value("${cors.allowed-origins:http://localhost:4200}")
@@ -29,8 +33,11 @@ public class CorsConfig {
 
         // Parse allowed origins (comma-separated if multiple)
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        // Log temporário para debug
+        log.info("CORS allowed origins: {}", origins);
         // Use allowedOriginPatterns to avoid alguns problemas de matching
         configuration.setAllowedOrigins(origins);
+        //configuration.setAllowedOriginPatterns(origins);
 
         // Allowed HTTP methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
@@ -52,5 +59,16 @@ public class CorsConfig {
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
+    }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        if(corsConfigurationSource() == null) {
+            log.warn("CORS configuration source is null!");
+        } else {
+            log.info("CORS configuration source initialized successfully.");
+        }
+        return new CorsFilter(corsConfigurationSource());
+
     }
 }
