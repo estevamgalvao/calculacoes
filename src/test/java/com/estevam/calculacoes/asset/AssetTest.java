@@ -70,7 +70,7 @@ class AssetTest {
             "PETR4",                      // código do ativo
             OperationType.BUY,            // tipo: compra
             "à vista",                    // mercado
-            100,                          // quantidade
+            new BigDecimal("100"),        // quantidade
             new BigDecimal("10.00")       // preço unitário
         );
         
@@ -86,7 +86,7 @@ class AssetTest {
         
         assertThat(asset.getQuantity())
             .as("Quantidade após compra única")
-            .isEqualTo(100);
+            .isEqualByComparingTo(new BigDecimal("100"));
         
         assertThat(asset.getTotalValue())
             .as("Valor total investido")
@@ -117,7 +117,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("10.00")
         );
         
@@ -126,7 +126,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("20.00")
         );
         
@@ -142,7 +142,7 @@ class AssetTest {
         
         assertThat(asset.getQuantity())
             .as("Quantidade total")
-            .isEqualTo(200);
+            .isEqualByComparingTo(new BigDecimal("200"));
         
         assertThat(asset.getTotalValue())
             .as("Valor total da posição (200 * 15)")
@@ -182,7 +182,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("10.00")
         );
         
@@ -191,7 +191,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("20.00")
         );
         
@@ -200,7 +200,7 @@ class AssetTest {
             "PETR4",
             OperationType.SELL,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("25.00")
         );
         
@@ -212,7 +212,7 @@ class AssetTest {
         // ASSERT
         assertThat(asset.getQuantity())
             .as("Quantidade após venda parcial (200 - 100)")
-            .isEqualTo(100);
+            .isEqualByComparingTo(new BigDecimal("100"));
         
         assertThat(asset.getAveragePrice())
             .as("Preço médio permanece o mesmo das ações remanescentes")
@@ -245,7 +245,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("20.00")
         );
         
@@ -254,7 +254,7 @@ class AssetTest {
             "PETR4",
             OperationType.SELL,
             "à vista",
-            50,
+            new BigDecimal("50"),
             new BigDecimal("15.00")
         );
         
@@ -265,7 +265,7 @@ class AssetTest {
         // ASSERT
         assertThat(asset.getQuantity())
             .as("Quantidade restante")
-            .isEqualTo(50);
+            .isEqualByComparingTo(new BigDecimal("50"));
         
         assertThat(asset.getAveragePrice())
             .as("Preço médio permanece 20")
@@ -297,7 +297,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("10.00")
         );
         
@@ -306,7 +306,7 @@ class AssetTest {
             "PETR4",
             OperationType.SELL,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("15.00")
         );
         
@@ -317,7 +317,7 @@ class AssetTest {
         // ASSERT
         assertThat(asset.getQuantity())
             .as("Posição zerada")
-            .isEqualTo(0);
+            .isEqualByComparingTo(BigDecimal.ZERO);
         
         assertThat(asset.getRealizedProfitLoss())
             .as("Lucro total: (15 - 10) * 100 = 500")
@@ -354,7 +354,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            50,
+            new BigDecimal("50"),
             new BigDecimal("10.00")
         );
         
@@ -363,7 +363,7 @@ class AssetTest {
             "PETR4",
             OperationType.SELL,
             "à vista",
-            100,  // Tentando vender mais do que tem!
+            new BigDecimal("100"),  // Tentando vender mais do que tem!
             new BigDecimal("20.00")
         );
         
@@ -374,7 +374,7 @@ class AssetTest {
         // ASSERT
         assertThat(asset.getQuantity())
             .as("Posição deve ser zerada (não pode ficar negativa)")
-            .isEqualTo(0);
+            .isEqualByComparingTo(BigDecimal.ZERO);
         
         assertThat(asset.getAveragePrice())
             .as("Preço médio zerado quando posição é zerada")
@@ -405,7 +405,7 @@ class AssetTest {
             "PETR4",
             OperationType.POSITION,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("12.00")  // preço médio histórico
         );
         
@@ -414,7 +414,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("18.00")
         );
         
@@ -425,7 +425,7 @@ class AssetTest {
         // ASSERT
         assertThat(asset.getQuantity())
             .as("Quantidade total")
-            .isEqualTo(200);
+            .isEqualByComparingTo(new BigDecimal("200"));
         
         assertThat(asset.getAveragePrice())
             .as("Preço médio: (100*12 + 100*18)/200 = 15")
@@ -467,7 +467,7 @@ class AssetTest {
             "PETR4",
             OperationType.SELL,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("25.00")
         );
         
@@ -476,7 +476,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("10.00")
         );
         
@@ -485,7 +485,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("20.00")
         );
         
@@ -497,7 +497,7 @@ class AssetTest {
         // ASSERT - Resultado deve ser igual ao teste "deveCalcularLucroRealizadoEmVendaParcial"
         assertThat(asset.getQuantity())
             .as("Quantidade final")
-            .isEqualTo(100);
+            .isEqualByComparingTo(new BigDecimal("100"));
         
         assertThat(asset.getAveragePrice())
             .as("Preço médio")
@@ -542,7 +542,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("10.00")
         );
         // Após op1: qty=100, avg=10, total=1000, profit=0
@@ -552,7 +552,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            50,
+            new BigDecimal("50"),
             new BigDecimal("12.00")
         );
         // Após op2: qty=150, avg=(1000+600)/150=10.666666666666666, total=1600, profit=0
@@ -562,7 +562,7 @@ class AssetTest {
             "PETR4",
             OperationType.SELL,
             "à vista",
-            75,
+            new BigDecimal("75"),
             new BigDecimal("15.00")
         );
         // Após op3: qty=75, avg=10.666666666666666, 
@@ -573,7 +573,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("8.00")
         );
         // Após op4: qty=175
@@ -585,7 +585,7 @@ class AssetTest {
             "PETR4",
             OperationType.SELL,
             "à vista",
-            50,
+            new BigDecimal("50"),
             new BigDecimal("20.00")
         );
         // Após op5: qty=125
@@ -602,7 +602,7 @@ class AssetTest {
         // ASSERT
         assertThat(asset.getQuantity())
             .as("Quantidade final: 100+50-75+100-50 = 125")
-            .isEqualTo(125);
+            .isEqualByComparingTo(new BigDecimal("125"));
         
         // Preço médio após todas as operações
         BigDecimal expectedAvgPrice = new BigDecimal("9.1428571429"); // 1600/175 antes da última venda
@@ -639,7 +639,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            333,
+            new BigDecimal("333"),
             new BigDecimal("10.333333")
         );
         
@@ -674,7 +674,7 @@ class AssetTest {
             "PETR4",
             OperationType.BUY,
             "à vista",
-            100,
+            new BigDecimal("100"),
             new BigDecimal("10.00")
         );
         asset.addOperation(compra);
@@ -689,6 +689,6 @@ class AssetTest {
             .contains("Petrobras PN")
             .contains("Clear Corretora")
             .contains("averagePrice=10.00")
-            .contains("quantity=100");
+            .containsAnyOf("quantity=100", "quantity=100.0");
     }
 }

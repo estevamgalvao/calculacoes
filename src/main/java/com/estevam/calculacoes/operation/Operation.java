@@ -12,10 +12,10 @@ public class Operation {
     private String assetCode;
     private OperationType type;
     private String marketType;
-    private int quantity;
+    private BigDecimal quantity;
     private BigDecimal price;
 
-    public Operation(LocalDate date, String assetCode, OperationType type, String marketType, int quantity, BigDecimal price) {
+    public Operation(LocalDate date, String assetCode, OperationType type, String marketType, BigDecimal quantity, BigDecimal price) {
         this.date = date;
         this.assetCode = assetCode.toUpperCase();
         this.type = type;
@@ -34,5 +34,4 @@ public class Operation {
                 ", price=" + price +
                 '}';
     }
-
 }
