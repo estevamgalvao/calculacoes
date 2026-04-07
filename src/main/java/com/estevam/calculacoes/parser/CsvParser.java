@@ -10,19 +10,17 @@ import lombok.extern.slf4j.Slf4j;
 import com.estevam.calculacoes.core.util.TickerUtils;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Parses CSV files containing stock trading history.
+ * Parses CSV files in canonical format (comma-delimited, quoted decimals).
+ * Expects input to be pre-normalized by CsvNormalizer.
  */
 @Slf4j
 public class CsvParser {
@@ -65,7 +63,7 @@ public class CsvParser {
             if (!expected.equals(actual)) {
                 throw new CsvParseException(
                     String.format("Invalid header at column %d: expected '%s', but found '%s'", 
-                        i + 1, expected, actual), 
+                    i + 1, expected, actual), 
                     null
                 );
             }
@@ -73,6 +71,10 @@ public class CsvParser {
     }
 
 
+    /**
+     * Parses canonical CSV content from a BufferedReader.
+     * Expects content already normalized by CsvNormalizer.
+     */
     public static Map<String, Asset> parseTrades(BufferedReader br) throws CsvParseException {
         Map<String, Asset> assets = new HashMap<>();
         String line;
@@ -81,20 +83,20 @@ public class CsvParser {
         try {
             while ((line = br.readLine()) != null) {
                 if (isFirstLine) {
-                    validateHeader(line); // Validate header before processing
+                    validateHeader(line);
                     isFirstLine = false;
                     continue;
                 }
                 if (line.trim().isEmpty()) {
-                    continue; // Skip empty lines
+                    continue;
                 }
 
                 String[] fields = parseCsvLine(line);
 
                 if (fields.length < 9) {
                     throw new CsvParseException(
-                        "Malformed CSV line: expected at least 9 fields but found " + fields.length + ". Line content: " + line, 
-                        null
+                    "Malformed CSV line: expected at least 9 fields but found " + fields.length + ". Line content: " + line, 
+                    null
                     );
                 }
 
@@ -104,11 +106,17 @@ public class CsvParser {
                 String institution = fields[4].trim();
                 String originalTicker = fields[5].trim();
                 String ticker = TickerUtils.cleanTicker(originalTicker);
-                int quantity = Integer.parseInt(fields[6].trim());
+
+                // Parse quantity (may be quoted if fractional, e.g., "246,66")
+                String quantityStr = fields[6].trim().replace("\"", "");
+                quantityStr = quantityStr.replace(".", "").replace(",", ".");
+                BigDecimal quantity = new BigDecimal(quantityStr);
+
+                // Parse price
                 String priceStr = fields[7];
-                validateQuotedBrazilianDecimalFormat(priceStr); // Validate price format "10.02" -> not valid, should be "10,02"
-                priceStr = priceStr.replace("\"", "").replace(" ", ""); // Remove quotes and spaces
-                priceStr = priceStr.replace("R$", "").replace(".", "").replace(",", "."); // Normalize currency format
+                validateQuotedBrazilianDecimalFormat(priceStr);
+                priceStr = priceStr.replace("\"", "").replace(" ", "");
+                priceStr = priceStr.replace("R$", "").replace(".", "").replace(",", ".");
                 BigDecimal price = new BigDecimal(priceStr);
 
                 OperationType operationType = OperationType.fromPortuguese(typeLabel);
@@ -121,7 +129,7 @@ public class CsvParser {
         } catch (IOException e) {
             throw new CsvParseException("Error reading CSV content", e);
         } catch (CsvParseException e) {
-            throw e; // Re-throw CSV parse exceptions
+            throw e;
         } catch (Exception e) {
             throw new CsvParseException("Error parsing CSV content", e);
         }
@@ -132,30 +140,29 @@ public class CsvParser {
 
     /**
      * Parses CSV content from byte array (for REST API uploads).
+     * Normalizes the content before parsing.
      * 
      * @param csvContent the CSV file content as byte array
+     * @param requestId the request identifier for logging
      * @return a map of assets indexed by trading code
      * @throws CsvParseException if parsing fails
      */
     public static Map<String, Asset> parseTradesFromCsvContent(byte[] csvContent, String requestId) throws CsvParseException {
-        log.info("[requestId={}] Starting CSV parsing.", requestId);
-        Map<String, Asset> assets = new HashMap<>();
+        log.info("[requestId={}] Starting CSV normalization and parsing.", requestId);
 
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(new ByteArrayInputStream(csvContent), StandardCharsets.UTF_8))) {
-            
+        String normalized = CsvNormalizer.normalize(csvContent);
+        log.info("[requestId={}] CSV normalization completed.", requestId);
+
+        Map<String, Asset> assets;
+        try (BufferedReader br = new BufferedReader(new StringReader(normalized))) {
             assets = parseTrades(br);
             log.info("[requestId={}] Completed CSV parsing. Parsed {} assets.", requestId, assets.size());
-
         } catch (IOException e) {
-            log.error("[requestId={}] Error processing CSV {}", requestId, e.getMessage(), e);
-            throw new CsvParseException("Error reading CSV content from byte array", e);
+            log.error("[requestId={}] Error processing CSV: {}", requestId, e.getMessage(), e);
+            throw new CsvParseException("Error reading normalized CSV content", e);
         } catch (CsvParseException e) {
-            log.error("[requestId={}] Error processing CSV {}", requestId, e.getMessage(), e);
-            throw e; // Re-throw CSV parse exceptions
-        } catch (Exception e) {
-            log.error("[requestId={}] Error processing CSV {}", requestId, e.getMessage(), e);
-            throw new CsvParseException("Error parsing CSV content", e);
+            log.error("[requestId={}] Error processing CSV: {}", requestId, e.getMessage(), e);
+            throw e;
         }
 
         return assets;
@@ -164,23 +171,23 @@ public class CsvParser {
 
     /**
      * Reads a CSV file and returns a map of assets indexed by trading code.
+     * Normalizes the content before parsing.
      */
     public static Map<String, Asset> parseTradesFromCsv(String csvFilePath) throws CsvParseException {
-        Map<String, Asset> assets = new HashMap<>();
+        try {
+            byte[] fileBytes = java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(csvFilePath));
+            String normalized = CsvNormalizer.normalize(fileBytes);
 
-        try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
-            
-            assets = parseTrades(br);
-
+            try (BufferedReader br = new BufferedReader(new StringReader(normalized))) {
+                return parseTrades(br);
+            }
         } catch (IOException e) {
             throw new CsvParseException("Error reading CSV file: " + csvFilePath, e);
         } catch (CsvParseException e) {
-            throw e; // Re-throw CSV parse exceptions
+            throw e;
         } catch (Exception e) {
             throw new CsvParseException("Error parsing CSV content", e);
         }
-
-        return assets;
     }
 
     /**
@@ -191,14 +198,23 @@ public class CsvParser {
     }
 
 
+    /**
+     * Validates that a price string is in Brazilian decimal format.
+     * Accepts values with or without enclosing quotes.
+     * 
+     * Valid examples: "R$ 9,18", " R$9,18 ", " R$ 1.234,56 "
+     * 
+     * @param rawPrice the raw price string from the CSV
+     * @throws CsvParseException if the format is invalid
+     */
     private static void validateQuotedBrazilianDecimalFormat(String rawPrice) throws CsvParseException {
         rawPrice = rawPrice.trim();
 
 
         if (!(rawPrice.startsWith("\"") && rawPrice.endsWith("\""))) {
             throw new CsvParseException(
-                "Invalid price: expected to be enclosed in quotes (e.g., \"10,03\"). Amount received: \"" 
-                + rawPrice + "\"",
+                "Invalid price: expected to be enclosed in quotes (e.g., \"R$10,03\"). Value received: " 
+                + rawPrice,
             null);
         }
 
@@ -206,10 +222,9 @@ public class CsvParser {
         
         s = s.replace("R$", "").trim();
 
-        
         if (s.matches(".*[a-zA-Z].*")) {
             throw new CsvParseException(
-                "Invalid price: should not contain letters after R$ removal. Amount received: \"" 
+                "Invalid price: should not contain letters after R$ removal. Value received: \"" 
                 + s + "\"",
             null);
         }
@@ -217,7 +232,7 @@ public class CsvParser {
         int commaIndex = s.lastIndexOf(',');
         if (commaIndex < 0) {
             throw new CsvParseException(
-                "Invalid price: expected decimal separator with comma (e.g., 10,03). Amount received: \"" 
+                "Invalid price: expected decimal separator with comma (e.g., 10,03). Value received: \"" 
                 + rawPrice + "\"",
             null);
         }
@@ -226,11 +241,10 @@ public class CsvParser {
 
         if (decimalPart.length() != 2 || !decimalPart.chars().allMatch(Character::isDigit)) {
             throw new CsvParseException(
-                "Invalid price: expected to have exactly 2 decimal places (e.g., 10,03). Amount received: \"" 
+                "Invalid price: expected exactly 2 decimal places (e.g., 10,03). Value received: \"" 
                 + rawPrice + "\"",
                 null
             );
         }
-}
-
+    }
 }
